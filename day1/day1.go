@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -31,8 +32,8 @@ func main() {
 		column1 = append(column1, num1)
 		column2 = append(column2, num2)
 	}
-	helper.Quicksort(column1)
-	helper.Quicksort(column2)
+	sort.Ints(column1)
+	sort.Ints(column2)
 
 	var part1Answer = Part1(column1, column2)
 	fmt.Println("Answer to part 1:", part1Answer)
