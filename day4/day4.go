@@ -19,6 +19,8 @@ func main() {
 	}
 	part1Answer := part1(wordMatrix, "XMAS")
 	fmt.Println("Answer to part 1:", part1Answer)
+	part2Answer := part2(wordMatrix)
+	fmt.Println("Answer to part 2:", part2Answer)
 }
 
 func part1(wordMatrix [][]rune, wordToMatch string) int {
@@ -27,6 +29,21 @@ func part1(wordMatrix [][]rune, wordToMatch string) int {
 		for col, _ := range r {
 			if wordMatrix[row][col] == rune(wordToMatch[0]) {
 				sum += checkEachDirectionForMatch(wordMatrix, wordToMatch, Vector{x: col, y: row})
+			}
+		}
+	}
+	return sum
+}
+
+func part2(wordMatrix [][]rune) int {
+	sum := 0
+	for row, r := range wordMatrix {
+		for col, _ := range r {
+			if row == 0 || row == len(wordMatrix[0])-1 || col == 0 || col == len(wordMatrix)-1 {
+				continue
+			}
+			if wordMatrix[row][col] == 'A' && checkForCross(wordMatrix, Vector{x: col, y: row}) {
+				sum += 1
 			}
 		}
 	}
@@ -55,6 +72,47 @@ func checkForMatch(wordMatrix [][]rune, wordToMatch string, startPoint Vector, d
 		coordinate = coordinate.Add(direction)
 	}
 	return 1
+}
+
+func checkForCross(wordMatrix [][]rune, startPoint Vector) bool {
+	topLeft := startPoint.Add(Vector{x: -1, y: 1})
+	topRight := startPoint.Add(Vector{x: 1, y: 1})
+	bottomLeft := startPoint.Add(Vector{x: -1, y: -1})
+	bottomRight := startPoint.Add(Vector{x: 1, y: -1})
+
+	if isOutOfBounds(wordMatrix, topLeft) ||
+		isOutOfBounds(wordMatrix, topRight) ||
+		isOutOfBounds(wordMatrix, bottomLeft) ||
+		isOutOfBounds(wordMatrix, bottomRight) {
+		return false
+	}
+
+	corners := []rune{
+		wordMatrix[topLeft.y][topLeft.x],
+		wordMatrix[topRight.y][topRight.x],
+		wordMatrix[bottomLeft.y][bottomLeft.x],
+		wordMatrix[bottomRight.y][bottomRight.x],
+	}
+
+	if corners[0] == corners[1] && corners[2] == corners[3] {
+		if corners[0] == 'M' && corners[2] == 'S' {
+			return true
+		}
+		if corners[0] == 'S' && corners[2] == 'M' {
+			return true
+		}
+	}
+
+	if corners[0] == corners[2] && corners[1] == corners[3] {
+		if corners[0] == 'M' && corners[1] == 'S' {
+			return true
+		}
+		if corners[0] == 'S' && corners[1] == 'M' {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (v Vector) Add(other Vector) Vector {
