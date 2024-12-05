@@ -39,6 +39,8 @@ func main() {
 	}
 	part1Answer := part1(updates)
 	fmt.Println("Answer to Part 1: ", part1Answer)
+	part2Answer := part2(updates)
+	fmt.Println("Answer to Part 2: ", part2Answer)
 }
 
 func part1(updates [][]int) int {
@@ -70,4 +72,27 @@ func AreInOrder(num1 int, num2 int) bool {
 		return false
 	}
 	return true
+}
+
+func part2(updates [][]int) int {
+	result := 0
+	for _, update := range updates {
+		l := len(update)
+		if !isOrdered(update) {
+			sort(update)
+			result += update[l/2]
+		}
+	}
+	return result
+}
+
+func sort(update []int) {
+	l := len(update)
+	for i := 0; i < l-1; i++ {
+		for j := 0; j < l-i-1; j++ {
+			if !AreInOrder(update[j], update[j+1]) {
+				update[j], update[j+1] = update[j+1], update[j]
+			}
+		}
+	}
 }
