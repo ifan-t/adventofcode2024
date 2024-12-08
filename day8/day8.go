@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	helper "github.com/ifan-t/adventofcode2024"
 )
@@ -32,6 +33,8 @@ func main() {
 	}
 	part1Answer := part1(noOfCols, noOfRows, strToVectorMap)
 	fmt.Println("Answer to part 1 is: ", part1Answer)
+	part2Answer := part2(noOfCols, noOfRows, strToVectorMap)
+	fmt.Println("Answer to part 2 is: ", part2Answer)
 }
 
 func part1(noOfCols int, noOfRows int, strToVectorMap map[string][]Vector) int {
@@ -69,6 +72,40 @@ func part1(noOfCols int, noOfRows int, strToVectorMap map[string][]Vector) int {
 	return sum
 }
 
+func part2(noOfCols int, noOfRows int, strToVectorMap map[string][]Vector) int {
+	sum := 0
+	visited := make(map[Vector]bool)
+	for _, vectors := range strToVectorMap {
+		for i, vector1 := range vectors {
+			for j, vector2 := range vectors {
+				if j <= i {
+					continue
+				}
+				m, c := getLine(vector1, vector2)
+				for x := 0; x <= noOfCols; x++ {
+					y := (m * float64(x)) + c
+					if !isWholeNumber(y) {
+						continue
+					}
+					yInt := int(math.Round(y))
+					potentialAntinode := Vector{x: x, y: yInt}
+					if potentialAntinode.y >= 0 && potentialAntinode.y <= noOfRows {
+						_, haveVisited := visited[potentialAntinode]
+						if !haveVisited {
+							sum++
+							visited[potentialAntinode] = true
+						}
+					}
+				}
+			}
+		}
+	}
+	return sum
+}
+func isWholeNumber(f float64) bool {
+	return math.Abs(f-math.Round(f)) <= 0.001
+}
+
 func (v Vector) Add(other Vector) Vector {
 	return Vector{
 		x: v.x + other.x,
@@ -81,4 +118,12 @@ func (v Vector) GetDifference(other Vector) Vector {
 		x: v.x - other.x,
 		y: v.y - other.y,
 	}
+}
+
+func getLine(v1 Vector, v2 Vector) (float64, float64) {
+	yChange := v1.y - v2.y
+	xChange := v1.x - v2.x
+	m := float64(yChange) / float64(xChange)
+	c := float64(v1.y) - m*float64(v1.x)
+	return m, c
 }
