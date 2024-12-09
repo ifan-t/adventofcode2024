@@ -1,7 +1,6 @@
 package main
 
 import (
-	"container/list"
 	"fmt"
 	"strconv"
 
@@ -10,46 +9,35 @@ import (
 
 func main() {
 	lines, _ := helper.ParseInput("input.txt")
-	part1Answer := part1(lines[0])
+	fileSystemArr := GetFileSystem(lines[0])
+
+	part1Answer := part1(fileSystemArr)
 	fmt.Println("Answer to part 1 is: ", part1Answer)
+	filesystem := make([]string, len(fileSystemArr))
+	copy(filesystem, fileSystemArr)
+	part2Answer := part2(filesystem)
+	fmt.Println("Answer to part 2 is: ", part2Answer)
 }
 
-func part1(line string) int {
-	queue := list.New()
-	var filesystemArr []string
-	for index, char := range line {
-		if index%2 == 0 {
-			fileIdStr := strconv.Itoa(index / 2)
-			noOfRepetitions, _ := strconv.Atoi(string(char))
-			for range noOfRepetitions {
-				filesystemArr = append(filesystemArr, fileIdStr)
-			}
-		} else {
-			noOfRepetitions, _ := strconv.Atoi(string(char))
-			queue.PushBack(noOfRepetitions)
-			for range noOfRepetitions {
-				filesystemArr = append(filesystemArr, ".")
-			}
-		}
-	}
-	// filesystem := []rune(filesystemStr)
-	for i := len(filesystemArr) - 1; i >= 0; i-- {
-		if filesystemArr[i] == "." {
+func part1(fileSystem []string) int {
+
+	for i := len(fileSystem) - 1; i >= 0; i-- {
+		if fileSystem[i] == "." {
 			continue
 		}
-		digitsStr := filesystemArr[i]
-		for index, str := range filesystemArr {
+		digitsStr := fileSystem[i]
+		for index, str := range fileSystem {
 			if index >= i {
 				break
 			}
 			if str == "." {
-				filesystemArr[index] = digitsStr
+				fileSystem[index] = digitsStr
 				break
 			}
 		}
 	}
 	sum := 0
-	for i, id := range filesystemArr {
+	for i, id := range fileSystem {
 		if id == "." {
 			break
 		}
@@ -57,4 +45,74 @@ func part1(line string) int {
 		sum += i * idValue
 	}
 	return sum
+}
+
+func part2(fileSystem []string) int {
+
+	for i := len(fileSystem) - 1; i >= 0; i-- {
+		if fileSystem[i] == "." {
+			continue
+		}
+		digitsStr := fileSystem[i]
+		fileBlockLength := 1
+		for j := i - 1; j >= 0; j-- {
+			if fileSystem[j] != digitsStr {
+				break
+			}
+			fileBlockLength++
+		}
+
+		for index, str := range fileSystem {
+			if index >= i {
+				break
+			}
+			if str == "." && EnoughSpace(fileBlockLength, index, fileSystem) {
+				for k := index; k < index+fileBlockLength; k++ {
+					fileSystem[k] = digitsStr
+				}
+				for l := i; l > i-fileBlockLength; l-- {
+					fileSystem[l] = "."
+				}
+				break
+			}
+		}
+		i = i - fileBlockLength + 1
+	}
+	sum := 0
+	for i, id := range fileSystem {
+		if id == "." {
+			continue
+		}
+		idValue, _ := strconv.Atoi(id)
+		sum += i * idValue
+	}
+	return sum
+}
+
+func EnoughSpace(fileBlockLength int, currentIndex int, fileSystem []string) bool {
+	for i := currentIndex; i < currentIndex+fileBlockLength; i++ {
+		if fileSystem[i] != "." {
+			return false
+		}
+	}
+	return true
+}
+
+func GetFileSystem(line string) []string {
+	var filesystem []string
+	for index, char := range line {
+		if index%2 == 0 {
+			fileIdStr := strconv.Itoa(index / 2)
+			noOfRepetitions, _ := strconv.Atoi(string(char))
+			for range noOfRepetitions {
+				filesystem = append(filesystem, fileIdStr)
+			}
+		} else {
+			noOfRepetitions, _ := strconv.Atoi(string(char))
+			for range noOfRepetitions {
+				filesystem = append(filesystem, ".")
+			}
+		}
+	}
+	return filesystem
 }
