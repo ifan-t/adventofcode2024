@@ -17,6 +17,8 @@ func main() {
 	lines, _ := helper.ParseInput("input.txt")
 	part1Answer := part1(lines)
 	fmt.Println("Answer to part1: ", part1Answer)
+	part2Answer := part2(lines)
+	fmt.Println("Answer to part2: ", part2Answer)
 
 }
 
@@ -62,4 +64,47 @@ func dfs(position Vector, current int, input []string, visited map[Vector]bool) 
 		}
 	}
 	return result
+}
+
+func part2(input []string) int {
+	sum := 0
+	for row, str := range input {
+		for col, char := range str {
+			if char != '0' {
+				continue
+			}
+
+			sum += dfs2(0, Vector{x: col, y: row}, input, Vector{x: -1, y: -1}, 1)
+		}
+	}
+	return sum
+}
+
+func dfs2(current int, position Vector, input []string, previous Vector, length int) int {
+
+	if position.x < 0 || position.x >= len(input[0]) || position.y < 0 || position.y >= len(input) {
+		return 0
+	}
+	if current != 0 && int(input[position.y][position.x]-'0') != current {
+		return 0
+	}
+	if current == 9 && length > 9 {
+		return 1
+	}
+	sum := 0
+	for _, v := range directions {
+		next := position.Add(v)
+		if next.x == previous.x && next.y == previous.y {
+			continue
+		}
+		sum += dfs2(current+1, next, input, position, length+1)
+	}
+	return sum
+}
+
+func (v Vector) Add(other Vector) Vector {
+	return Vector{
+		x: v.x + other.x,
+		y: v.y + other.y,
+	}
 }
